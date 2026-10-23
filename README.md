@@ -38,24 +38,29 @@ Add this to `~/.claude/settings.json`, or to a repo's `.claude/settings.json` to
 }
 ```
 
-### 2. Status line segment
+### 2. Status line
 
-The status line runs as a script configured with `statusLine` in `settings.json`. Add the swamp segment to it. Add this near the top of the script, before the output is built:
+`statusline/statusline.sh` is the full Claude Code status line. It shows the model, context and rate-limit usage, and the swamp version from `~/.claude/.swamp-version` as its last segment. It needs `jq`.
+
+If you don't already have a status line, install it:
 
 ```sh
-swamp_ver=""
-if [ -f ~/.claude/.swamp-version ]; then
-  swamp_ver=$(tr -d '\n' < ~/.claude/.swamp-version | sed 's/^[[:space:]]*//;s/[[:space:]]*$//')
-fi
+cp ~/dev/swamp-update-status/statusline/statusline.sh ~/.claude/statusline.sh
+chmod +x ~/.claude/statusline.sh
 ```
 
-Then pass it into `jq` with `--arg swamp "$swamp_ver"`, and add this as the last element of the array that gets joined with ` | `:
+Then add this to `~/.claude/settings.json`:
 
-```jq
-(if $swamp != "" then "🐊 SC \($swamp)" else empty end)
+```json
+{
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  }
+}
 ```
 
-If you don't use a `jq` status line, the segment is just the contents of `~/.claude/.swamp-version`.
+If you already have a status line, back up your script first and merge in only the swamp segment. It's the `swamp_ver` block at the top, and the `🐊 SC` entry at the end of the `jq` array.
 
 ### Upgrading repos (opt-in)
 
